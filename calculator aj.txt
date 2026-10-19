@@ -1,0 +1,102 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Grade Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #eef2ff;
+            text-align: center;
+            padding: 40px 15px;
+        }
+
+        .container {
+            background: white;
+            max-width: 400px;
+            margin: auto;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px #ccd2e0;
+        }
+
+        input, button {
+            width: 90%;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 7px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        button {
+            background: #4f46e5;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+
+        button:hover {
+            background: #3730a3;
+        }
+
+        #result {
+            font-weight: bold;
+            margin-top: 20px;
+            white-space: pre-line;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Grade Calculator</h1>
+        <p>Enter your marks for 5 subjects (out of 100).</p>
+
+        <input type="number" id="m1" placeholder="Subject 1 marks" min="0" max="100">
+        <input type="number" id="m2" placeholder="Subject 2 marks" min="0" max="100">
+        <input type="number" id="m3" placeholder="Subject 3 marks" min="0" max="100">
+        <input type="number" id="m4" placeholder="Subject 4 marks" min="0" max="100">
+        <input type="number" id="m5" placeholder="Subject 5 marks" min="0" max="100">
+
+        <button onclick="calculateGrade()">Calculate Grade</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function calculateGrade() {
+            const marks = [];
+
+            for (let i = 1; i <= 5; i++) {
+                const value = document.getElementById("m" + i).value;
+
+                if (value === "" || Number(value) < 0 ||
+                    Number(value) > 100) {
+                    document.getElementById("result").textContent =
+                        "Please enter marks from 0 to 100 for every subject.";
+                    return;
+                }
+
+                marks.push(Number(value));
+            }
+
+            const total = marks.reduce((sum, mark) => sum + mark, 0);
+            const percentage = total / 5;
+            let grade;
+
+            if (percentage >= 90) grade = "A+";
+            else if (percentage >= 80) grade = "A";
+            else if (percentage >= 70) grade = "B";
+            else if (percentage >= 60) grade = "C";
+            else if (percentage >= 40) grade = "D";
+            else grade = "F";
+
+            document.getElementById("result").textContent =
+                "Total: " + total + "/500\n" +
+                "Percentage: " + percentage.toFixed(2) + "%\n" +
+                "Grade: " + grade;
+        }
+    </script>
+</body>
+</html>
