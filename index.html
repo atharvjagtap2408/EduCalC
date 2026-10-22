@@ -2,101 +2,522 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Grade Calculator</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #eef2ff;
-            text-align: center;
-            padding: 40px 15px;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Grade Calculator</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-        .container {
-            background: white;
-            max-width: 400px;
-            margin: auto;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px #ccd2e0;
-        }
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #eef2ff, #f5f3ff);
+      color: #1e293b;
+      min-height: 100vh;
+      padding: 24px 14px;
+    }
 
-        input, button {
-            width: 90%;
-            padding: 12px;
-            margin: 8px 0;
-            border-radius: 7px;
-            border: 1px solid #ccc;
-            box-sizing: border-box;
-        }
+    .container {
+      max-width: 760px;
+      margin: auto;
+    }
 
-        button {
-            background: #4f46e5;
-            color: white;
-            cursor: pointer;
-            border: none;
-        }
+    .header {
+      text-align: center;
+      margin: 12px 0 24px;
+    }
 
-        button:hover {
-            background: #3730a3;
-        }
+    .header .logo {
+      font-size: 42px;
+      margin-bottom: 8px;
+    }
 
-        #result {
-            font-weight: bold;
-            margin-top: 20px;
-            white-space: pre-line;
-        }
-    </style>
+    h1 {
+      font-size: clamp(25px, 5vw, 34px);
+      color: #4338ca;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: #64748b;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    .card {
+      background: #ffffff;
+      padding: 24px;
+      border-radius: 18px;
+      box-shadow: 0 10px 35px rgba(30, 41, 59, 0.09);
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      font-size: 20px;
+      margin-bottom: 18px;
+      color: #334155;
+    }
+
+    .field {
+      margin-bottom: 17px;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 7px;
+      color: #475569;
+    }
+
+    input {
+      width: 100%;
+      min-width: 0;
+      padding: 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 9px;
+      font-size: 15px;
+      background: #fff;
+      color: #0f172a;
+    }
+
+    input:focus {
+      outline: 2px solid #818cf8;
+      border-color: #6366f1;
+    }
+
+    .subject-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .subject-box {
+      padding: 14px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+    }
+
+    .subject-box input + input {
+      margin-top: 9px;
+    }
+
+    .hint {
+      display: block;
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 6px;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    button {
+      flex: 1;
+      border: 0;
+      padding: 13px 15px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .calculate {
+      background: #4f46e5;
+      color: white;
+    }
+
+    .calculate:hover {
+      background: #4338ca;
+    }
+
+    .reset {
+      background: #e2e8f0;
+      color: #334155;
+    }
+
+    .message {
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 9px;
+      background: #fff1f2;
+      color: #be123c;
+      display: none;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .results {
+      display: none;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .summary-item {
+      background: #eef2ff;
+      padding: 16px 10px;
+      text-align: center;
+      border-radius: 12px;
+    }
+
+    .summary-item span {
+      display: block;
+      color: #64748b;
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .summary-item strong {
+      color: #4338ca;
+      font-size: clamp(18px, 4vw, 25px);
+      overflow-wrap: anywhere;
+    }
+
+    .grade-message {
+      background: #f0fdf4;
+      color: #166534;
+      padding: 14px;
+      border-radius: 10px;
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 380px;
+      font-size: 14px;
+    }
+
+    th, td {
+      padding: 12px 10px;
+      border-bottom: 1px solid #e2e8f0;
+      text-align: left;
+    }
+
+    th {
+      background: #f8fafc;
+      color: #475569;
+    }
+
+    .pass {
+      color: #15803d;
+      font-weight: 700;
+    }
+
+    .fail {
+      color: #dc2626;
+      font-weight: 700;
+    }
+
+    .footer {
+      text-align: center;
+      color: #64748b;
+      font-size: 12px;
+      padding: 5px 0 15px;
+    }
+
+    @media (max-width: 520px) {
+      body {
+        padding: 14px 10px;
+      }
+
+      .card {
+        padding: 17px;
+      }
+
+      .subject-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-item {
+        padding: 12px;
+      }
+
+      .buttons {
+        flex-direction: column;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Grade Calculator</h1>
-        <p>Enter your marks for 5 subjects (out of 100).</p>
+  <main class="container">
+    <header class="header">
+      <div class="logo">🎓</div>
+      <h1>Student Grade Calculator</h1>
+      <p class="subtitle">
+        Calculate your marks, percentage and grade in seconds.
+      </p>
+    </header>
 
-        <input type="number" id="m1" placeholder="Subject 1 marks" min="0" max="100">
-        <input type="number" id="m2" placeholder="Subject 2 marks" min="0" max="100">
-        <input type="number" id="m3" placeholder="Subject 3 marks" min="0" max="100">
-        <input type="number" id="m4" placeholder="Subject 4 marks" min="0" max="100">
-        <input type="number" id="m5" placeholder="Subject 5 marks" min="0" max="100">
+    <section class="card">
+      <h2>📝 Enter Student Details</h2>
 
-        <button onclick="calculateGrade()">Calculate Grade</button>
-        <div id="result"></div>
-    </div>
+      <div class="field">
+        <label for="studentName">Student Name (optional)</label>
+        <input
+          type="text"
+          id="studentName"
+          placeholder="Enter your name"
+          maxlength="80"
+        >
+      </div>
 
-    <script>
-        function calculateGrade() {
-            const marks = [];
+      <h2>📚 Subjects and Marks</h2>
 
-            for (let i = 1; i <= 5; i++) {
-                const value = document.getElementById("m" + i).value;
+      <p class="subtitle" style="margin-bottom:16px">
+        Edit subject names if needed. Enter marks out of 100.
+      </p>
 
-                if (value === "" || Number(value) < 0 ||
-                    Number(value) > 100) {
-                    document.getElementById("result").textContent =
-                        "Please enter marks from 0 to 100 for every subject.";
-                    return;
-                }
+      <div class="subject-grid" id="subjectGrid"></div>
 
-                marks.push(Number(value));
-            }
+      <div class="buttons">
+        <button class="calculate" id="calculateBtn" type="button">
+          Calculate Results
+        </button>
+        <button class="reset" id="resetBtn" type="button">
+          Reset
+        </button>
+      </div>
 
-            const total = marks.reduce((sum, mark) => sum + mark, 0);
-            const percentage = total / 5;
-            let grade;
+      <div class="message" id="message" role="alert"></div>
+    </section>
 
-            if (percentage >= 90) grade = "A+";
-            else if (percentage >= 80) grade = "A";
-            else if (percentage >= 70) grade = "B";
-            else if (percentage >= 60) grade = "C";
-            else if (percentage >= 40) grade = "D";
-            else grade = "F";
+    <section class="card results" id="results" aria-live="polite">
+      <h2>📊 Your Results</h2>
 
-            document.getElementById("result").textContent =
-                "Total: " + total + "/500\n" +
-                "Percentage: " + percentage.toFixed(2) + "%\n" +
-                "Grade: " + grade;
+      <p id="welcome" style="margin-bottom:18px"></p>
+
+      <div class="summary-grid">
+        <div class="summary-item">
+          <span>Total Marks</span>
+          <strong id="total">0/500</strong>
+        </div>
+
+        <div class="summary-item">
+          <span>Percentage</span>
+          <strong id="percentage">0%</strong>
+        </div>
+
+        <div class="summary-item">
+          <span>Final Grade</span>
+          <strong id="grade">F</strong>
+        </div>
+      </div>
+
+      <div class="grade-message" id="gradeMessage"></div>
+
+      <h2>Subject-wise Results</h2>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Subject</th>
+              <th>Marks</th>
+              <th>Result</th>
+            </tr>
+          </thead>
+          <tbody id="resultRows"></tbody>
+        </table>
+      </div>
+
+      <p id="passSummary" style="margin-top:16px"></p>
+    </section>
+
+    <footer class="footer">
+      Student Grade Calculator · Made for students
+    </footer>
+  </main>
+
+  <script>
+    const defaultSubjects = [
+      "Mathematics",
+      "Physics",
+      "Chemistry",
+      "English",
+      "Computer Science"
+    ];
+
+    const subjectGrid = document.getElementById("subjectGrid");
+    const message = document.getElementById("message");
+    const results = document.getElementById("results");
+
+    function createSubjects() {
+      subjectGrid.innerHTML = "";
+
+      defaultSubjects.forEach((subject, index) => {
+        const box = document.createElement("div");
+        box.className = "subject-box";
+
+        const label = document.createElement("label");
+        label.htmlFor = "subject" + index;
+        label.textContent = "Subject " + (index + 1) + " Name";
+
+        const nameInput = document.createElement("input");
+        nameInput.type = "text";
+        nameInput.id = "subject" + index;
+        nameInput.value = subject;
+        nameInput.maxLength = 60;
+        nameInput.setAttribute("aria-label", "Subject " + (index + 1) + " name");
+
+        const marksInput = document.createElement("input");
+        marksInput.type = "number";
+        marksInput.id = "marks" + index;
+        marksInput.min = "0";
+        marksInput.max = "100";
+        marksInput.step = "1";
+        marksInput.placeholder = "Marks out of 100";
+        marksInput.setAttribute("aria-label", subject + " marks");
+
+        const hint = document.createElement("span");
+        hint.className = "hint";
+        hint.textContent = "Minimum passing marks: 40";
+
+        box.append(label, nameInput, marksInput, hint);
+        subjectGrid.appendChild(box);
+      });
+    }
+
+    function showError(text) {
+      message.textContent = text;
+      message.style.display = "block";
+      results.style.display = "none";
+    }
+
+    function calculateResults() {
+      message.style.display = "none";
+
+      const subjects = [];
+      let total = 0;
+
+      for (let i = 0; i < 5; i++) {
+        const name = document.getElementById("subject" + i)
+          .value.trim();
+        const input = document.getElementById("marks" + i);
+        const raw = input.value.trim();
+
+        if (!name) {
+          showError("Please enter a name for Subject " + (i + 1) + ".");
+          document.getElementById("subject" + i).focus();
+          return;
         }
-    </script>
+
+        if (raw === "") {
+          showError("Please enter marks for " + name + ".");
+          input.focus();
+          return;
+        }
+
+        const marks = Number(raw);
+
+        if (!Number.isInteger(marks) || marks < 0 || marks > 100) {
+          showError("Marks for " + name + " must be a whole number from 0 to 100.");
+          input.focus();
+          return;
+        }
+
+        subjects.push({ name, marks });
+        total += marks;
+      }
+
+      const percentage = total / 5;
+      let grade;
+      let comment;
+
+      if (percentage >= 90) {
+        grade = "A+";
+        comment = "Outstanding performance! Keep it up.";
+      } else if (percentage >= 80) {
+        grade = "A";
+        comment = "Excellent work! Keep learning.";
+      } else if (percentage >= 70) {
+        grade = "B";
+        comment = "Very good! Keep improving.";
+      } else if (percentage >= 60) {
+        grade = "C";
+        comment = "Good effort. You can do even better.";
+      } else if (percentage >= 40) {
+        grade = "D";
+        comment = "You passed overall. Keep practising.";
+      } else {
+        grade = "F";
+        comment = "Keep practising and ask for help when needed.";
+      }
+
+      const passed = subjects.filter(s => s.marks >= 40).length;
+
+      document.getElementById("welcome").textContent =
+        document.getElementById("studentName").value.trim()
+          ? "Results for " + document.getElementById("studentName").value.trim()
+          : "Here are your calculated results.";
+
+      document.getElementById("total").textContent = total + "/500";
+      document.getElementById("percentage").textContent =
+        percentage.toFixed(2) + "%";
+      document.getElementById("grade").textContent = grade;
+      document.getElementById("gradeMessage").textContent = comment;
+
+      const rows = document.getElementById("resultRows");
+      rows.replaceChildren();
+
+      subjects.forEach(subject => {
+        const row = document.createElement("tr");
+        const nameCell = document.createElement("td");
+        const marksCell = document.createElement("td");
+        const resultCell = document.createElement("td");
+        const passedSubject = subject.marks >= 40;
+
+        nameCell.textContent = subject.name;
+        marksCell.textContent = subject.marks + "/100";
+        resultCell.textContent = passedSubject ? "Pass" : "Fail";
+        resultCell.className = passedSubject ? "pass" : "fail";
+
+        row.append(nameCell, marksCell, resultCell);
+        rows.appendChild(row);
+      });
+
+      document.getElementById("passSummary").textContent =
+        "Subjects passed: " + passed + " out of 5.";
+
+      results.style.display = "block";
+      results.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function resetCalculator() {
+      document.getElementById("studentName").value = "";
+      createSubjects();
+      message.style.display = "none";
+      results.style.display = "none";
+    }
+
+    document.getElementById("calculateBtn")
+      .addEventListener("click", calculateResults);
+
+    document.getElementById("resetBtn")
+      .addEventListener("click", resetCalculator);
+
+    createSubjects();
+  </script>
 </body>
 </html>
