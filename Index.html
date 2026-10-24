@@ -1,1 +1,231 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EduCalc - Student Calculator</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f3f5fb;color:#172033}
+header{background:#283593;color:white;padding:24px 16px;text-align:center}
+header h1{margin:0 0 8px}
+nav{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;padding:14px}
+button{background:#3949ab;color:white;border:0;border-radius:8px;padding:11px 14px;cursor:pointer}
+nav button{background:#e0e5ff;color:#283593}
+main{max-width:760px;margin:auto;padding:12px}
+section{background:white;border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 3px 14px #17203312}
+h2{margin-top:0;color:#283593}
+input{width:100%;padding:11px;margin:6px 0 12px;border:1px solid #ccd2df;border-radius:8px;font-size:16px}
+.result{font-weight:bold;margin-top:12px;overflow-wrap:anywhere}
+.item{padding:10px 0;border-bottom:1px solid #e5e7eb}
+small{color:#626b7c}
+</style>
+</head>
+<body>
+<header>
+<h1>🎓 EduCalc</h1>
+<p>Your all-in-one student academic calculator</p>
+</header>
+
+<nav>
+<button onclick="show('sgpa')">SGPA / CGPA</button>
+<button onclick="show('marks')">Marks</button>
+<button onclick="show('attendance')">Attendance</button>
+<button onclick="show('history')">Saved Semesters</button>
+</nav>
+
+<main>
+<section id="sgpa">
+<h2>SGPA Calculator</h2>
+<small>Enter each subject's credits and grade points.</small>
+<div id="subjects"></div>
+<button onclick="addSubject()">+ Add Subject</button>
+<button onclick="calculateSGPA()">Calculate SGPA</button>
+<div class="result" id="sgpaResult" aria-live="polite"></div>
+<label for="semester">Semester name</label>
+<input id="semester" placeholder="e.g. Semester 1">
+<button onclick="saveSemester()">Save Semester Result</button>
+</section>
+
+<section id="marks" hidden>
+<h2>Marks & Percentage</h2>
+<label for="obtained">Marks obtained</label>
+<input id="obtained" type="number" min="0" placeholder="e.g. 420">
+<label for="total">Total possible marks</label>
+<input id="total" type="number" min="1" placeholder="e.g. 500">
+<button onclick="calculateMarks()">Calculate Percentage</button>
+<div class="result" id="marksResult" aria-live="polite"></div>
+</section>
+
+<section id="attendance" hidden>
+<h2>Attendance Calculator</h2>
+<label for="attended">Classes attended</label>
+<input id="attended" type="number" min="0" placeholder="e.g. 36">
+<label for="classes">Total classes conducted</label>
+<input id="classes" type="number" min="1" placeholder="e.g. 40">
+<label for="target">Target attendance (%)</label>
+<input id="target" type="number" min="1" max="100" value="75">
+<button onclick="calculateAttendance()">Calculate Attendance</button>
+<div class="result" id="attendanceResult" aria-live="polite"></div>
+</section>
+
+<section id="history" hidden>
+<h2>Saved Semester Results</h2>
+<div id="saved"></div>
+</section>
+</main>
+
+<script>
+let subjectCount = 0;
+let lastSGPA = null;
+let history = [];
+
+try {
+  const stored = JSON.parse(localStorage.getItem('educalc-history') || '[]');
+  if (Array.isArray(stored)) history = stored;
+} catch (_) {
+  history = [];
+}
+
+function show(id) {
+  document.querySelectorAll('main section').forEach(s => s.hidden = true);
+  document.getElementById(id).hidden = false;
+  if (id === 'history') renderHistory();
+}
+
+function addSubject(credits = '', grade = '') {
+  subjectCount++;
+  const row = document.createElement('div');
+  row.className = 'item';
+  row.innerHTML = `
+    <strong>Subject ${subjectCount}</strong>
+    <label>Credits</label>
+    <input type="number" min="0.01" step="any" class="credit" placeholder="e.g. 4">
+    <label>Grade points</label>
+    <input type="number" min="0" max="10" step="any" class="grade" placeholder="e.g. 9">
+    <button type="button" class="remove">Remove</button>`;
+  row.querySelector('.credit').value = credits;
+  row.querySelector('.grade').value = grade;
+  row.querySelector('.remove').onclick = () => row.remove();
+  document.getElementById('subjects').appendChild(row);
+}
+
+function calculateSGPA() {
+  const rows = [...document.querySelectorAll('#subjects .item')];
+  if (!rows.length) {
+    document.getElementById('sgpaResult').textContent = 'Add at least one subject.';
+    return;
+  }
+  let weighted = 0, credits = 0;
+  for (const row of rows) {
+    const c = Number(row.querySelector('.credit').value);
+    const g = Number(row.querySelector('.grade').value);
+    if (!row.querySelector('.credit').value ||
+        !row.querySelector('.grade').value ||
+        !Number.isFinite(c) || !Number.isFinite(g) ||
+        c <= 0 || g < 0 || g > 10) {
+      document.getElementById('sgpaResult').textContent =
+        'Enter valid credits and grade points (0–10) for every subject.';
+      return;
+    }
+    weighted += c * g;
+    credits += c;
+  }
+  lastSGPA = weighted / credits;
+  document.getElementById('sgpaResult').textContent =
+    `SGPA: ${lastSGPA.toFixed(2)} | Total credits: ${credits}`;
+}
+
+function calculateMarks() {
+  const o = document.getElementById('obtained').value;
+  const t = document.getElementById('total').value;
+  const result = document.getElementById('marksResult');
+  if (o === '' || t === '' || Number(t) <= 0 ||
+      Number(o) < 0 || Number(o) > Number(t)) {
+    result.textContent = 'Enter valid marks. Obtained marks cannot exceed total marks.';
+    return;
+  }
+  result.textContent = `Percentage: ${(Number(o) / Number(t) * 100).toFixed(2)}%`;
+}
+
+function calculateAttendance() {
+  const a = document.getElementById('attended').value;
+  const t = document.getElementById('classes').value;
+  const goal = Number(document.getElementById('target').value);
+  const result = document.getElementById('attendanceResult');
+  if (a === '' || t === '' || Number(t) <= 0 ||
+      Number(a) < 0 || Number(a) > Number(t) ||
+      !Number.isFinite(goal) || goal <= 0 || goal > 100) {
+    result.textContent = 'Enter valid class counts and a target from 1% to 100%.';
+    return;
+  }
+  const attended = Number(a), total = Number(t);
+  const pct = attended / total * 100;
+  let message = `Attendance: ${pct.toFixed(2)}%. `;
+  if (pct >= goal) {
+    message += 'Your target is met. ';
+    if (goal < 100) {
+      message += `You can miss up to ${Math.floor((attended - goal * total / 100) / (goal / 100))} consecutive classes and remain at the target.`;
+    }
+  } else if (goal < 100) {
+    message += `Attend the next ${Math.ceil((goal * total - 100 * attended) / (100 - goal))} consecutive classes to reach ${goal}%.`;
+  } else {
+    message += 'Attend every future class to reach 100%.';
+  }
+  result.textContent = message;
+}
+
+function saveSemester() {
+  if (lastSGPA === null) {
+    document.getElementById('sgpaResult').textContent = 'Calculate SGPA before saving.';
+    return;
+  }
+  const name = document.getElementById('semester').value.trim();
+  if (!name) {
+    document.getElementById('sgpaResult').textContent = 'Enter a semester name before saving.';
+    return;
+  }
+  history.push({name, sgpa: lastSGPA, date: new Date().toLocaleDateString()});
+  try {
+    localStorage.setItem('educalc-history', JSON.stringify(history));
+    document.getElementById('sgpaResult').textContent = 'Semester result saved on this device.';
+    lastSGPA = null;
+  } catch (_) {
+    history.pop();
+    document.getElementById('sgpaResult').textContent = 'Could not save. Check browser storage settings.';
+  }
+}
+
+function renderHistory() {
+  const saved = document.getElementById('saved');
+  saved.replaceChildren();
+  if (!history.length) {
+    saved.textContent = 'No saved semesters yet.';
+    return;
+  }
+  history.forEach((item, index) => {
+    const row = document.createElement('div');
+    row.className = 'item';
+    const title = document.createElement('strong');
+    title.textContent = item.name;
+    const details = document.createElement('p');
+    details.textContent = `SGPA: ${Number(item.sgpa).toFixed(2)} · Saved: ${item.date}`;
+    const remove = document.createElement('button');
+    remove.textContent = 'Delete';
+    remove.onclick = () => {
+      history.splice(index, 1);
+      localStorage.setItem('educalc-history', JSON.stringify(history));
+      renderHistory();
+    };
+    row.append(title, details, remove);
+    saved.appendChild(row);
+  });
+}
+
+addSubject();
+addSubject();
+</script>
+</body>
+</html>
+
